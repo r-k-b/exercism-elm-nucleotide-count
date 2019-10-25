@@ -1,6 +1,6 @@
 module NucleotideCount exposing (nucleotideCounts)
 
-import Parser exposing ((|=), Parser, map, symbol)
+import Parser exposing ((|=), Parser, Step, map, symbol)
 
 
 type Nucleotide
@@ -33,16 +33,23 @@ allZeros =
     }
 
 
-decodeDNA : Parser (List Nucleotide)
+decodeDNA : Parser DNA
 decodeDNA =
-    Parser.sequence
-        { start = ""
-        , separator = ""
-        , end = ""
-        , spaces = Parser.spaces
-        , item = decodeNucleotide
-        , trailing = Parser.Optional
-        }
+    Parser.loop [] decodeDNAhelp
+
+
+type alias DNA =
+    List Nucleotide
+
+
+decodeDNAhelp : DNA -> Parser (Step DNA DNA)
+decodeDNAhelp dna =
+    Parser.oneOf
+        [ Parser.succeed (\nucleotide -> Parser.Loop (nucleotide :: dna))
+            |= decodeNucleotide
+        , Parser.end
+            |> map (\_ -> Parser.Done (List.reverse dna))
+        ]
 
 
 decodeNucleotide : Parser Nucleotide

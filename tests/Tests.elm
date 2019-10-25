@@ -2,7 +2,8 @@ module Tests exposing (tests)
 
 import Expect
 import NucleotideCount exposing (nucleotideCounts)
-import Test exposing (..)
+import Parser exposing (Problem(..))
+import Test exposing (Test, describe, test)
 
 
 tests : Test
@@ -20,4 +21,16 @@ tests =
             \() ->
                 Expect.equal (Result.Ok { a = 20, t = 21, c = 12, g = 17 })
                     (nucleotideCounts "AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC")
+        , test "returns informative errors for invalid dna" <|
+            \() ->
+                Expect.equal
+                    (Result.Err
+                        [ { col = 4, problem = ExpectingSymbol "A", row = 1 }
+                        , { col = 4, problem = ExpectingSymbol "C", row = 1 }
+                        , { col = 4, problem = ExpectingSymbol "G", row = 1 }
+                        , { col = 4, problem = ExpectingSymbol "T", row = 1 }
+                        , { col = 4, problem = ExpectingEnd, row = 1 }
+                        ]
+                    )
+                    (nucleotideCounts "ACTDOGGTA")
         ]
