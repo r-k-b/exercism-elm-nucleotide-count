@@ -18,14 +18,11 @@ type alias NucleotideCounts =
     }
 
 
-nucleotideCounts : String -> NucleotideCounts
+nucleotideCounts : String -> Result (List Parser.DeadEnd) NucleotideCounts
 nucleotideCounts sequence =
-    case sequence |> Parser.run decodeDNA of
-        Ok dna ->
-            dna |> List.foldl count allZeros
-
-        Err _ ->
-            allZeros
+    sequence
+        |> Parser.run decodeDNA
+        |> Result.map (List.foldl count allZeros)
 
 
 allZeros =
